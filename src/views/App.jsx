@@ -1,4 +1,3 @@
-// src/views/App.jsx
 import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -20,6 +19,7 @@ import { useCart } from './hooks/useCart';
 export default function App() {
     const auth = useAuth();
     const cart = useCart();
+
     const [showLogin, setShowLogin] = useState(false);
     const [showRegister, setShowRegister] = useState(false);
     const [packageInfo, setPackageInfo] = useState(null);
@@ -29,11 +29,14 @@ export default function App() {
 
     function handleSelectPackage(name, price) {
         if (!auth.currentUser) { setShowLogin(true); return; }
-        setPackageInfo({ name, price }); setShowPackage(true);
+        setPackageInfo({ name, price });
+        setShowPackage(true);
     }
+
     function handleShowWorkout(type, htmlContent) {
         setWorkout({ visible: true, title: type, content: htmlContent });
     }
+
     function handleAddToCart(name, price) {
         if (!auth.currentUser) { setShowLogin(true); return; }
         cart.add({ name, price });
@@ -41,7 +44,12 @@ export default function App() {
 
     return (
         <div className="bg-gray-50">
-            <Navbar currentUser={auth.currentUser} onShowLogin={() => setShowLogin(true)} onShowRegister={() => setShowRegister(true)} onLogout={auth.logout} />
+            <Navbar
+                currentUser={auth.currentUser}
+                onShowLogin={() => setShowLogin(true)}
+                onShowRegister={() => setShowRegister(true)}
+                onLogout={auth.logout}
+            />
             <Hero />
             <About />
             <Packages onSelectPackage={handleSelectPackage} />
@@ -51,15 +59,31 @@ export default function App() {
             <Contact />
             <Footer />
 
+            {/* Giỏ hàng */}
             <div className="fixed bottom-6 right-6 z-40">
-                <button onClick={() => setShowCart(true)} className="bg-purple-600 text-white p-4 rounded-full shadow-lg">🛒 <span className="bg-red-500 text-white rounded-full px-2 py-1 text-xs ml-1">{cart.totalCount}</span></button>
+                <button onClick={() => setShowCart(true)} className="bg-purple-600 text-white p-4 rounded-full shadow-lg">
+                    🛒 <span className="bg-red-500 text-white rounded-full px-2 py-1 text-xs ml-1">{cart.totalCount}</span>
+                </button>
             </div>
 
-            <LoginModal visible={showLogin} onClose={() => setShowLogin(false)} onLogin={(e, p) => { if (auth.login(e, p)) { alert('Đăng nhập thành công'); setShowLogin(false); } else alert('Đăng nhập thất bại'); }} />
-            <RegisterModal visible={showRegister} onClose={() => setShowRegister(false)} onRegister={(u) => auth.register(u)} />
+            {/* Modal */}
+            <LoginModal visible={showLogin} onClose={() => setShowLogin(false)}
+                onLogin={(email, pass) => auth.login(email, pass)} />
+            <RegisterModal visible={showRegister} onClose={() => setShowRegister(false)}
+                onRegister={(u) => auth.register(u)} />
             <PackageModal visible={showPackage} packageInfo={packageInfo} onClose={() => setShowPackage(false)} />
-            <WorkoutModal visible={workout.visible} title={workout.title} content={workout.content} onClose={() => setWorkout({ ...workout, visible: false })} />
-            <CartModal visible={showCart} cart={cart.cart} onClose={() => setShowCart(false)} onRemove={cart.remove} onCheckout={() => { if (cart.cart.length === 0) return alert('Giỏ hàng trống'); alert('Cảm ơn!'); cart.clear(); setShowCart(false); }} />
+            <WorkoutModal visible={workout.visible} title={workout.title} content={workout.content}
+                onClose={() => setWorkout({ ...workout, visible: false })} />
+            <CartModal visible={showCart} cart={cart.cart}
+                onClose={() => setShowCart(false)}
+                onRemove={cart.remove}
+                onCheckout={() => {
+                    if (cart.cart.length === 0) return alert('Giỏ hàng trống');
+                    alert('Cảm ơn bạn!');
+                    cart.clear();
+                    setShowCart(false);
+                }}
+            />
         </div>
     );
 }

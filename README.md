@@ -5,13 +5,6 @@ Dự án được tách component rõ ràng, có hiệu ứng động, giỏ hà
 
 ---
 
-## 🚀 Demo
-> _(Nếu bạn đã deploy trên Vercel/Netlify, có thể thêm link ở đây)_
-
-[🔗 Xem bản demo trực tuyến](#)
-
----
-
 ## 🧩 Tính năng nổi bật
 
 ✅ **Trang chủ (Hero Section)** – Giới thiệu tổng quan FitZone  

@@ -1,30 +1,61 @@
-// src/views/hooks/useAuth.js
-import { useState, useEffect } from 'react';
-
-function read(key, init) {
-    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : init; } catch { return init; }
-}
-function write(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch { } }
+import { useState } from "react";
 
 export function useAuth() {
-    const [users, setUsers] = useState(() => read('fitzone_users', []));
-    const [currentUser, setCurrentUser] = useState(() => read('fitzone_current_user', null));
+    const [currentUser, setCurrentUser] = useState(
+        JSON.parse(localStorage.getItem("fitzoneUser")) || null
+    );
 
-    useEffect(() => write('fitzone_users', users), [users]);
-    useEffect(() => write('fitzone_current_user', currentUser), [currentUser]);
+    const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-    function login(emailOrPhone, password) {
-        const u = users.find(u => (u.email === emailOrPhone || u.phone === emailOrPhone) && u.password === password);
-        if (u) { setCurrentUser(u); return true; } return false;
-    }
-    function register(userData) {
-        if (users.find(u => u.email === userData.email || u.phone === userData.phone)) {
-            return { success: false, message: 'Email hoặc số điện thoại đã được sử dụng!' };
+    const register = async (user) => {
+        try {
+            const res = await fetch(`${API_URL}/api/users/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(user),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert("Đăng ký thành công!");
+                return true;
+            } else {
+                alert(data.message || "Lỗi khi đăng ký!");
+                return false;
+            }
+        } catch (err) {
+            console.error("Register error:", err);
+            return false;
         }
-        const newU = { id: Date.now(), ...userData, createdAt: new Date().toISOString() };
-        setUsers([...users, newU]); return { success: true, user: newU };
-    }
-    function logout() { setCurrentUser(null); }
+    };
 
-    return { users, currentUser, login, register, logout, setCurrentUser };
+    const login = async (email, password) => {
+        try {
+            const res = await fetch(`${API_URL}/api/users/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("fitzoneUser", JSON.stringify(data));
+                setCurrentUser(data);
+                return true;
+            } else {
+                alert(data.message || "Sai thông tin đăng nhập!");
+                return false;
+            }
+        } catch (err) {
+            console.error("Login error:", err);
+            return false;
+        }
+    };
+
+    const logout = () => {
+        setCurrentUser(null);
+        localStorage.removeItem("token");
+        localStorage.removeItem("fitzoneUser");
+    };
+
+    return { currentUser, register, login, logout };
 }
