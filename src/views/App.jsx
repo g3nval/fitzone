@@ -15,6 +15,9 @@ import WorkoutModal from './components/Modals/WorkoutModal';
 import CartModal from './components/Modals/CartModal';
 import { useAuth } from './hooks/useAuth';
 import { useCart } from './hooks/useCart';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 export default function App() {
     const auth = useAuth();
@@ -69,8 +72,12 @@ export default function App() {
             {/* Modal */}
             <LoginModal visible={showLogin} onClose={() => setShowLogin(false)}
                 onLogin={(email, pass) => auth.login(email, pass)} />
-            <RegisterModal visible={showRegister} onClose={() => setShowRegister(false)}
-                onRegister={(u) => auth.register(u)} />
+            <RegisterModal
+                visible={showRegister}
+                onClose={() => setShowRegister(false)}
+                onRegister={(userData) => auth.register(userData)}
+            />
+
             <PackageModal visible={showPackage} packageInfo={packageInfo} onClose={() => setShowPackage(false)} />
             <WorkoutModal visible={workout.visible} title={workout.title} content={workout.content}
                 onClose={() => setWorkout({ ...workout, visible: false })} />
@@ -84,6 +91,7 @@ export default function App() {
                     setShowCart(false);
                 }}
             />
+            <ToastContainer position="top-center" autoClose={2500} />
         </div>
     );
 }
